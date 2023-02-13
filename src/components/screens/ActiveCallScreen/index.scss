@@ -1,0 +1,67 @@
+.cs-calling-options_buttons {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	margin-top: 20px;
+	gap: 30px;
+}
+.cs-calling-options_buttons__button_group {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	cursor: pointer;
+
+	.cs-calling-options_buttons__button_group__text {
+		font-size: 10px;
+		color: #c1bebe;
+		margin-top: 5px;
+	}
+}
+.cs-calling-options-details_buttons {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	margin-top: 20px;
+	gap: 15px;
+	.cs-calling-options-details_buttons__button_group {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		background-color: #2d2f50;
+		padding: 15px;
+		width: 70px;
+		cursor: pointer;
+		border-radius: 10px;
+		&:hover {
+			background-color: #3a3d5a;
+		}
+		.cs-calling-options-details_buttons__button_group__text {
+			font-size: 10px;
+			color: #c1bebe;
+			margin-top: 5px;
+		}
+	}
+}
+
+.cs-calling-options-footer-buttons {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	margin-top: 20px;
+	gap: 15px;
+	.cs-calling-options-buttons__button_group__reject {
+		background-color: #ff0000;
+		padding: 10px;
+		width: 50px;
+		border-radius: 10px;
+		height: 50px;
+		border-radius: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		cursor: pointer;
+		&:hover {
+			background-color: #ff4d4d;
+		}
+	}
+}
