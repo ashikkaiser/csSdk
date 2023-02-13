@@ -17,46 +17,6 @@ import {
 	_getAudioElement,
 } from "./Sip";
 
-// const SipPhone = () => {
-// 	let userAgent;
-
-// 	const options = {
-// 		uri: UserAgent.makeURI("sip:1006@sip-prod.cleverstack.in"),
-// 		authorizationUsername: "1006",
-// 		authorizationPassword: "Admin@5678",
-
-// 		transportOptions: {
-// 			server: "wss://sip-prod.cleverstack.in:7443",
-// 			traceSip: false,
-// 		},
-// 		sessionDescriptionHandlerFactoryOptions: {
-// 			peerConnectionConfiguration: {
-// 				iceServers: [
-// 					{
-// 						urls: "stun:stun.l.google.com:19302",
-// 					},
-// 				],
-// 			},
-// 			iceGatheringTimeout: 500,
-// 		},
-// 		delegate: {
-// 			onInvite: (session: any) => {
-// 				console.log("onInvite", session);
-// 			},
-// 		},
-// 	};
-// 	userAgent = new UserAgent(options);
-// 	userAgent.start().catch((error) => {
-// 		console.log(error);
-// 		console.log("userAgent.start() error");
-// 	});
-
-// 	userAgent.transport.onConnect = () => {
-// 		console.log("onConnect");
-// 	};
-// };
-
-// export default SipPhone;
 type SipPhoneContextType = {
 	sipPhone: any;
 	invite: (destination: string) => void;
