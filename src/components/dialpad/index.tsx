@@ -1,7 +1,7 @@
 import "./index.scss";
 import { useContext, useEffect } from "react";
+import { AuthContext } from "../../context/AuthContect";
 import { CallIcon, ClearIcon } from "../icons";
-import { SipPhoneContext } from "../../sipjs/Phone";
 
 type DialPadProps = {
 	diallingNumber: string;
@@ -15,8 +15,9 @@ export default function DialPad({
 	minimize,
 }: DialPadProps) {
 	const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, "*", 0, "#"];
+	const { sipCaller } = useContext(AuthContext);
 
-	const { invite } = useContext(SipPhoneContext);
+	// console.log("diallingNumber", sipCaller);
 
 	const handleKeyDown = (e: any) => {
 		if (e.key === "Backspace") {
@@ -85,7 +86,7 @@ export default function DialPad({
 					className="cs-dial-pad__footer__button_call"
 					onClick={() => {
 						// call();
-						invite(diallingNumber);
+						sipCaller.invite(diallingNumber);
 					}}>
 					<span>
 						<CallIcon color="white" height="25px" width="25px" />

@@ -1,24 +1,70 @@
 import { Card } from "antd";
 import cn from "classnames";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { AuthContext } from "../../context/AuthContect";
+import {
+	ACCEPTED,
+	INCOMING,
+	NEW,
+	OUTGOING,
+	PROGRESS,
+	TERMINATED,
+} from "../../sipjs/SessionStates";
 import DialPad from "../dialpad";
 import { PhoneDrawer } from "../Drawer";
 import { CrossIcon, TowerIcon } from "../icons";
-import { InitialScreen, ActiveCallScreen } from "../screens";
+import { ActiveCallScreen, CallingScreen, InitialScreen } from "../screens";
 import "./index.scss";
-// import SipPhone from "../../sipjs/Phone";
 type WidgetProps = {
 	minimize?: boolean;
 };
 
 export function Widget({ minimize }: WidgetProps) {
-	const [register, setRegister] = useState(true);
 	const [openDrawer, setOpenDrawer] = useState(false);
-	const { user, login, logout } = useContext(AuthContext);
-
+	const store: any = useSelector((state) => state);
+	const { user } = useContext(AuthContext);
 	const [diallingNumber, setDiallingNumber] = useState("");
-	console.log(user);
+	const [currentCall, setCurrentCall] = useState({}) as any;
+
+	const { userStatus, sessions } = store;
+	useEffect(() => {
+		if (userStatus?.currentSession) {
+			setCurrentCall(sessions[userStatus.currentSession]);
+		} else {
+			setCurrentCall(null);
+		}
+	}, [store, minimize]);
+
+	const callIsRunning = () => {
+		switch (currentCall?.sessionState) {
+			case NEW:
+				return false;
+			case PROGRESS:
+				return true;
+			case ACCEPTED:
+				return true;
+			case TERMINATED:
+				return false;
+			default:
+				return false;
+		}
+	};
+
+	const callIsIncoming =
+		sessions[userStatus?.currentSession]?.direction === INCOMING;
+	const callIsOutgoing =
+		sessions[userStatus?.currentSession]?.direction === OUTGOING;
+	useEffect(() => {
+		if (currentCall) {
+			setOpenDrawer(false);
+		}
+	}, [currentCall]);
+	// console.log("userStatus", userStatus);
+
+	// console.log("currentSession", userStatus?.currentSession);
+	// console.log("currentCall", sessions);
+
 	return (
 		<div
 			className="cs-widget"
@@ -41,7 +87,7 @@ export function Widget({ minimize }: WidgetProps) {
 					hidden={minimize}>
 					<div
 						className={cn("cs-header", {
-							"cs-header--register": register,
+							"cs-header--register": userStatus?.registered,
 						})}>
 						<span>0.38</span>
 						<span>Personal Line</span>
@@ -63,13 +109,32 @@ export function Widget({ minimize }: WidgetProps) {
 					</div>
 
 					<div className="cs-body">
-						<InitialScreen
-							setOpenDrawer={setOpenDrawer}
-							user={user}
-						/>
-						{/* <CallingScreen callType="incoming" /> */}
+						{callIsRunning() ? (
+							<ActiveCallScreen />
+						) : (
+							<div>
+								{callIsIncoming || callIsOutgoing ? (
+									<CallingScreen
+										sipSession={currentCall?.sipSession}
+										callType={
+											callIsIncoming
+												? "incoming"
+												: "outgoing"
+										}
+									/>
+								) : (
+									<InitialScreen
+										setOpenDrawer={setOpenDrawer}
+										user={user}
+									/>
+								)}
+							</div>
+						)}
+
 						{/* <ActiveCallScreen /> */}
 					</div>
+
+					{/* {} */}
 
 					<PhoneDrawer
 						openDrawer={openDrawer}

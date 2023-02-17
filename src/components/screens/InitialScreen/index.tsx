@@ -1,3 +1,4 @@
+import { useSelector } from "react-redux";
 import { DialPadIcon } from "../../icons";
 import "./index.scss";
 
@@ -7,6 +8,7 @@ type InitialScreenProps = {
 };
 
 const InitialScreen = ({ setOpenDrawer, user }: InitialScreenProps) => {
+	const { registered } = useSelector((state: any) => state.userStatus);
 	return (
 		<>
 			<div className="cs-greeting">
@@ -25,6 +27,7 @@ const InitialScreen = ({ setOpenDrawer, user }: InitialScreenProps) => {
 				</div>
 			</div>
 			<div
+				hidden={!registered}
 				onClick={() => setOpenDrawer(true)}
 				className="cs-dialpad-button">
 				<DialPadIcon

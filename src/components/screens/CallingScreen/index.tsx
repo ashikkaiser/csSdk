@@ -1,14 +1,22 @@
 import { UserOutlined } from "@ant-design/icons";
 import { Avatar } from "antd";
 import cn from "classnames";
+import { useContext } from "react";
+import { AuthContext } from "../../../context/AuthContect";
 import { CallEndIcon, CallIcon } from "../../icons";
 import "./index.scss";
 
 type CallingScreenProps = {
 	callType: "incoming" | "outgoing";
+	sipSession: any;
 };
 
-export default function CallingScreen({ callType }: CallingScreenProps) {
+export default function CallingScreen({
+	callType,
+	sipSession,
+}: CallingScreenProps) {
+	const { sipCaller } = useContext(AuthContext);
+
 	return (
 		<div>
 			<div className="cs-calling-body">
@@ -37,7 +45,10 @@ export default function CallingScreen({ callType }: CallingScreenProps) {
 								"cs-calling-footer__button-fix-margin":
 									callType === "outgoing",
 							})}>
-							<span>
+							<span
+								onClick={() =>
+									sipCaller.terminate(sipSession, callType)
+								}>
 								<CallEndIcon
 									height="25px"
 									color="#fff"
@@ -50,7 +61,7 @@ export default function CallingScreen({ callType }: CallingScreenProps) {
 								"cs-calling-footer__button-answer--outgoing":
 									callType === "outgoing",
 							})}>
-							<span>
+							<span onClick={() => sipCaller.accept(sipSession)}>
 								<CallIcon
 									height="25px"
 									color="#fff"

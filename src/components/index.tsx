@@ -1,28 +1,26 @@
-import "./index.scss";
-import cn from "classnames";
-import openLauncher from "../assets/launcher_button.svg";
 import "antd/dist/reset.css";
-import { Button } from "antd";
-import { FloatButton } from "antd";
-import { useContext, useState } from "react";
-import Luncher from "./luncher";
-import { Widget } from "./widget";
+import { useEffect, useState } from "react";
+import { Provider } from "react-redux";
 import AuthContextProvider from "../context/AuthContect";
-import SipPhoneProvider, { SipPhoneContext } from "../sipjs/Phone";
+import { store } from "../utils/store";
+import "./index.scss";
+import Luncher from "./luncher";
+import SessionNotifications from "./Notifications/SessionNotifications";
+import { Widget } from "./widget";
 
 type PhoneProps = {
-	openImg?: string;
+	apiKey: string;
+	user_id: string;
 };
+// Element implicitly has an 'any' type because type 'typeof globalThis' has no index signature.ts(7017)
 
-const Phone = ({}: PhoneProps) => {
+const Phone = ({ user_id, apiKey }: PhoneProps) => {
 	const [minimize, setMinimize] = useState(true);
-	const { sipPhone } = useContext(SipPhoneContext);
-
-	console.log(sipPhone);
 
 	return (
-		<AuthContextProvider>
-			<SipPhoneProvider>
+		<Provider store={store}>
+			<AuthContextProvider apiKey={apiKey} user_id={user_id}>
+				<SessionNotifications />
 				<div
 					className="cs-phone"
 					style={{
@@ -31,8 +29,8 @@ const Phone = ({}: PhoneProps) => {
 					<Luncher minimize={minimize} setMinimize={setMinimize} />
 					{!minimize && <Widget minimize={minimize} />}
 				</div>
-			</SipPhoneProvider>
-		</AuthContextProvider>
+			</AuthContextProvider>
+		</Provider>
 	);
 };
 
