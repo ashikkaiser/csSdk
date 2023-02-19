@@ -1,8 +1,10 @@
 import { Card } from "antd";
 import cn from "classnames";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import useSound from "use-sound";
 import { AuthContext } from "../../context/AuthContect";
+import useAudio from "../../hooks/useAudio";
 import {
 	ACCEPTED,
 	INCOMING,
@@ -16,16 +18,34 @@ import { PhoneDrawer } from "../Drawer";
 import { CrossIcon, TowerIcon } from "../icons";
 import { ActiveCallScreen, CallingScreen, InitialScreen } from "../screens";
 import "./index.scss";
-type WidgetProps = {
-	minimize?: boolean;
-};
-
-export function Widget({ minimize }: WidgetProps) {
+// type WidgetProps = {
+// 	minimize?: boolean;
+// };
+export function Widget({ minimize }) {
 	const [openDrawer, setOpenDrawer] = useState(false);
-	const store: any = useSelector((state) => state);
+	const store = useSelector((state) => state);
 	const { user } = useContext(AuthContext);
 	const [diallingNumber, setDiallingNumber] = useState("");
-	const [currentCall, setCurrentCall] = useState({}) as any;
+	const [currentCall, setCurrentCall] = useState({})
+	// const [playing, toggle] = useAudio("./../media/EarlyMedia.mp3");
+	///play sound fucntion here 
+	// const playSound = () => {
+	// 	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+	// 	const context = new AudioContext();
+	// 	const audio = new Audio("./../media/EarlyMedia.mp3");
+	// 	const source = context.createMediaElementSource(audio);
+	// 	const gainNode = context.createGain();
+	// 	source.connect(gainNode);
+	// 	gainNode.connect(context.destination);
+	// 	gainNode.gain.value = 0.5;
+	// 	audio.play();
+
+	// 	console.log(audio);
+
+	// };
+
+
+
 
 	const { userStatus, sessions } = store;
 	useEffect(() => {
@@ -59,11 +79,10 @@ export function Widget({ minimize }: WidgetProps) {
 		if (currentCall) {
 			setOpenDrawer(false);
 		}
-	}, [currentCall]);
-	// console.log("userStatus", userStatus);
 
-	// console.log("currentSession", userStatus?.currentSession);
-	// console.log("currentCall", sessions);
+	}, [currentCall]);
+
+
 
 	return (
 		<div

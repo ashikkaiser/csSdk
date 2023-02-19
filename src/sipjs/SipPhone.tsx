@@ -19,14 +19,17 @@ let store: any = null;
 
 export default class SipCaller {
 	_ua: UserAgent | null;
+	earlyMedia: HTMLAudioElement;
+
 	static init(data: any) {
 		store = data.store;
 	}
-
 	constructor() {
 		this._ua = null;
 		this._init();
+		this.earlyMedia = new Audio("./../media/EarlyMedia.mp3");
 	}
+
 	_init() {
 		this.register();
 	}
@@ -174,6 +177,7 @@ export default class SipCaller {
 		}
 		const inviter = new Inviter(this._ua, targetURI, spdOptions);
 		inviter.invite();
+
 		inviter.stateChange.addListener((state: SessionState) => {
 			switch (state) {
 				case SessionState.Establishing:
@@ -183,7 +187,8 @@ export default class SipCaller {
 				case SessionState.Established:
 					this._getAudioElement(inviter);
 					this._onProgress(inviter);
-					console.log("invitere", inviter);
+					this.earlyMedia.play();
+					this.earlyMedia.loop = true;
 					console.log("Established");
 					break;
 				case SessionState.Terminating:
@@ -191,6 +196,8 @@ export default class SipCaller {
 					break;
 				case SessionState.Terminated:
 					console.log("Terminated");
+					this.earlyMedia.pause();
+					this.earlyMedia.currentTime = 0;
 					this._tarminateSession(inviter);
 					break;
 				default:
