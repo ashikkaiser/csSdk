@@ -8,14 +8,17 @@ import "./index.scss";
 
 type CallingScreenProps = {
 	callType: "incoming" | "outgoing";
-	sipSession: any;
+	currentCall: any;
 };
 
 export default function CallingScreen({
 	callType,
-	sipSession,
+	currentCall,
 }: CallingScreenProps) {
 	const { sipCaller } = useContext(AuthContext);
+	const displayName =
+		currentCall?.sipSession.remoteIdentity.displayName ||
+		currentCall?.sipSession.remoteIdentity.uri.user;
 
 	return (
 		<div>
@@ -30,10 +33,10 @@ export default function CallingScreen({
 					</div>
 					<div className="cs-calling-content-info">
 						<span className="cs-calling-content-info-name">
-							Md Ashik Kaiser
+							{displayName}
 						</span>
 						<span className="cs-calling-content-info-number">
-							+880 1711 111 111
+							{displayName}
 						</span>
 					</div>
 				</div>
@@ -47,7 +50,10 @@ export default function CallingScreen({
 							})}>
 							<span
 								onClick={() =>
-									sipCaller.terminate(sipSession, callType)
+									sipCaller.terminate(
+										currentCall?.sipSession,
+										callType
+									)
 								}>
 								<CallEndIcon
 									height="25px"
@@ -61,7 +67,10 @@ export default function CallingScreen({
 								"cs-calling-footer__button-answer--outgoing":
 									callType === "outgoing",
 							})}>
-							<span onClick={() => sipCaller.accept(sipSession)}>
+							<span
+								onClick={() => {
+									sipCaller.accept(currentCall?.sipSession);
+								}}>
 								<CallIcon
 									height="25px"
 									color="#fff"

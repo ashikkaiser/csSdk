@@ -14,6 +14,8 @@ import TagIcon from "./TagIcon";
 import ContactAddIcon from "./ContactAddIcon";
 import TransfarIcon from "./TransfarIcon";
 import MoreIcon from "./MoreIcon";
+import MuteIcon from "./MuteIcon";
+import UnHoldIcon from "./UnHoldIcon";
 export {
 	TowerIcon,
 	DownArrowIcon,
@@ -31,4 +33,6 @@ export {
 	ContactAddIcon,
 	TransfarIcon,
 	MoreIcon,
+	MuteIcon,
+	UnHoldIcon,
 };

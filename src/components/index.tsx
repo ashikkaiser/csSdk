@@ -1,5 +1,5 @@
 import "antd/dist/reset.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Provider } from "react-redux";
 import AuthContextProvider from "../context/AuthContect";
 import { store } from "../utils/store";

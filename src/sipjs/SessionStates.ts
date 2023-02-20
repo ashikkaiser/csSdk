@@ -8,6 +8,8 @@ export const FAILED = Symbol("FAILED"); // Session failed (incoming/outgoing)
 export const TERMINATED = Symbol("TERMINATED"); // Session terminated (incoming/outgoing)
 export const UNMUTED = Symbol("UNMUTED"); // Session unmuted (incoming/outgoing)
 export const MUTED = Symbol("MUTED"); // Session muted (incoming/outgoing)
+export const HOLD = Symbol("HOLD"); // Session hold (incoming/outgoing)
+export const UNHOLD = Symbol("UNHOLD"); // Session unhold (incoming/outgoing)
 
 export const REFERRED = Symbol("REFERRED"); // Incoming REFER
 export const REFER_REQUEST_ACCEPTED = Symbol("REFER_REQUEST_ACCEPTED"); // Refer accepted by remote party

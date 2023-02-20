@@ -14,7 +14,6 @@ const initialState =
 	isOnHold: false,
 	sessionState: sessionStates.NEW // State of session
 };
-// console.log('sessions.js: sessions = ', sessionStates);
 
 const session = (state = initialState, action) => {
 	switch (action.type) {

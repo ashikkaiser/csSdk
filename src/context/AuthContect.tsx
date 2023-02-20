@@ -58,6 +58,7 @@ const AuthContextProvider = (props: any) => {
 			SipCaller.init({ store });
 			sipCaller = new SipCaller();
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [callingInfo]);
 
 	const login = (user: string) => {
@@ -70,6 +71,7 @@ const AuthContextProvider = (props: any) => {
 
 	useEffect(() => {
 		getUser();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

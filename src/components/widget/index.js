@@ -1,52 +1,28 @@
 import { Card } from "antd";
 import cn from "classnames";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import useSound from "use-sound";
 import { AuthContext } from "../../context/AuthContect";
-import useAudio from "../../hooks/useAudio";
 import {
 	ACCEPTED,
 	INCOMING,
 	NEW,
 	OUTGOING,
 	PROGRESS,
-	TERMINATED,
+	TERMINATED
 } from "../../sipjs/SessionStates";
 import DialPad from "../dialpad";
 import { PhoneDrawer } from "../Drawer";
 import { CrossIcon, TowerIcon } from "../icons";
 import { ActiveCallScreen, CallingScreen, InitialScreen } from "../screens";
 import "./index.scss";
-// type WidgetProps = {
-// 	minimize?: boolean;
-// };
+
 export function Widget({ minimize }) {
 	const [openDrawer, setOpenDrawer] = useState(false);
 	const store = useSelector((state) => state);
 	const { user } = useContext(AuthContext);
 	const [diallingNumber, setDiallingNumber] = useState("");
 	const [currentCall, setCurrentCall] = useState({})
-	// const [playing, toggle] = useAudio("./../media/EarlyMedia.mp3");
-	///play sound fucntion here 
-	// const playSound = () => {
-	// 	window.AudioContext = window.AudioContext || window.webkitAudioContext;
-	// 	const context = new AudioContext();
-	// 	const audio = new Audio("./../media/EarlyMedia.mp3");
-	// 	const source = context.createMediaElementSource(audio);
-	// 	const gainNode = context.createGain();
-	// 	source.connect(gainNode);
-	// 	gainNode.connect(context.destination);
-	// 	gainNode.gain.value = 0.5;
-	// 	audio.play();
-
-	// 	console.log(audio);
-
-	// };
-
-
-
-
 	const { userStatus, sessions } = store;
 	useEffect(() => {
 		if (userStatus?.currentSession) {
@@ -54,6 +30,7 @@ export function Widget({ minimize }) {
 		} else {
 			setCurrentCall(null);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [store, minimize]);
 
 	const callIsRunning = () => {
@@ -70,7 +47,6 @@ export function Widget({ minimize }) {
 				return false;
 		}
 	};
-
 	const callIsIncoming =
 		sessions[userStatus?.currentSession]?.direction === INCOMING;
 	const callIsOutgoing =
@@ -79,11 +55,8 @@ export function Widget({ minimize }) {
 		if (currentCall) {
 			setOpenDrawer(false);
 		}
-
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [currentCall]);
-
-
-
 	return (
 		<div
 			className="cs-widget"
@@ -129,12 +102,21 @@ export function Widget({ minimize }) {
 
 					<div className="cs-body">
 						{callIsRunning() ? (
-							<ActiveCallScreen />
+							<ActiveCallScreen
+								setOpenDrawer={setOpenDrawer}
+								currentCall={currentCall}
+								callType={
+									callIsIncoming
+										? "incoming"
+										: "outgoing"
+								}
+							/>
 						) : (
 							<div>
 								{callIsIncoming || callIsOutgoing ? (
 									<CallingScreen
-										sipSession={currentCall?.sipSession}
+										setOpenDrawer={setOpenDrawer}
+										currentCall={currentCall}
 										callType={
 											callIsIncoming
 												? "incoming"
@@ -149,11 +131,8 @@ export function Widget({ minimize }) {
 								)}
 							</div>
 						)}
-
-						{/* <ActiveCallScreen /> */}
 					</div>
 
-					{/* {} */}
 
 					<PhoneDrawer
 						openDrawer={openDrawer}

@@ -122,6 +122,8 @@ export const toggleRemoteAudio = ({ sipSession }) => (dispatch) => {
 	});
 };
 
+
+
 export const toggleRemoteVideo = ({ sipSession }) => (dispatch) => {
 	dispatch({
 		type: 'TOGGLE_REMOTE_VIDEO',

@@ -17,8 +17,6 @@ export default function DialPad({
 	const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, "*", 0, "#"];
 	const { sipCaller } = useContext(AuthContext);
 
-	// console.log("diallingNumber", sipCaller);
-
 	const handleKeyDown = (e: any) => {
 		if (e.key === "Backspace") {
 			setDiallingNumber(diallingNumber.slice(0, -1));
@@ -60,6 +58,7 @@ export default function DialPad({
 		return () => {
 			document.removeEventListener("keydown", handleKeyDown);
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [diallingNumber, minimize]);
 
 	return (

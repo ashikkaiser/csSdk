@@ -4,6 +4,7 @@ import {
 	OUTGOING,
 	PROGRESS,
 	TERMINATED,
+	HOLD,
 } from "./SessionStates";
 import * as requestActions from "../redux/actions/requestActions";
 import * as stateActions from "../redux/actions/stateActions";
@@ -87,6 +88,7 @@ export default class SipCaller {
 									break;
 								case SessionState.Established:
 									this._getAudioElement(sipSession);
+									this._onProgress(sipSession);
 
 									// Session has been established.
 									console.log("Established");
@@ -113,7 +115,6 @@ export default class SipCaller {
 			registerer.register().then(() => {});
 		});
 
-		//registerer.register();
 		registerer.stateChange.addListener((state: any) => {
 			if (state === RegistererState.Registered) {
 				store.dispatch(
@@ -140,13 +141,10 @@ export default class SipCaller {
 		});
 	}
 	terminate(session: any, direction: string) {
-		console.log("reject", session);
-		console.log("direction", direction);
 		if (direction === "outgoing") {
 			session.dispose();
 		}
 		if (direction === "incoming") {
-			console.log("reject", session);
 			if (session.state === SessionState.Established) {
 				session.bye();
 			} else {
@@ -157,9 +155,8 @@ export default class SipCaller {
 
 	invite = (sipUri: string) => {
 		var targetURI: any = UserAgent.makeURI(
-			// `sip:${destination}@sip-prod.cleverstack.in`
-			//TODO: remove hard coded sip uri
-			`sip:7019@sip-prod.cleverstack.in`
+			`sip:${sipUri}@sip-prod.cleverstack.in` //TODO: remove hard coded sip uri
+			// `sip:7019@sip-prod.cleverstack.in`
 		);
 
 		var spdOptions = {
@@ -181,14 +178,16 @@ export default class SipCaller {
 		inviter.stateChange.addListener((state: SessionState) => {
 			switch (state) {
 				case SessionState.Establishing:
+					// this.earlyMedia.play();
+					// this.earlyMedia.loop = true;
 					console.log("Establishing");
 					console.log("inviter", inviter);
 					break;
 				case SessionState.Established:
 					this._getAudioElement(inviter);
 					this._onProgress(inviter);
-					this.earlyMedia.play();
-					this.earlyMedia.loop = true;
+					// this.earlyMedia.pause();
+					// this.earlyMedia.currentTime = 0;
 					console.log("Established");
 					break;
 				case SessionState.Terminating:
@@ -196,8 +195,7 @@ export default class SipCaller {
 					break;
 				case SessionState.Terminated:
 					console.log("Terminated");
-					this.earlyMedia.pause();
-					this.earlyMedia.currentTime = 0;
+
 					this._tarminateSession(inviter);
 					break;
 				default:
@@ -217,11 +215,25 @@ export default class SipCaller {
 		session.sessionDescriptionHandler.peerConnection
 			.getReceivers()
 			.forEach((receiver: any) => {
-				console.log(receiver);
 				if (receiver.track) {
 					remoteStream.addTrack(receiver.track);
 				}
 			});
+
+		const localStream = new MediaStream();
+
+		session.sessionDescriptionHandler.peerConnection
+			.getSenders()
+			.forEach((sender: any) => {
+				if (sender.track) localStream.addTrack(sender.track);
+			});
+
+		store.dispatch(
+			stateActions.addLocalStream({ sipSession: session, localStream })
+		);
+		store.dispatch(
+			stateActions.addRemoteStream({ sipSession: session, remoteStream })
+		);
 		if (audioElement) {
 			audioElement.srcObject = remoteStream;
 			audioElement.play();
@@ -242,6 +254,7 @@ export default class SipCaller {
 
 	_handleSession = (sipSession: any, direction: any) => {
 		const startTime = Date.now();
+		console.log("startTime", sipSession);
 
 		store.dispatch(
 			stateActions.addSession({
@@ -310,6 +323,7 @@ export default class SipCaller {
 	};
 
 	_onProgress = (sipSession: any) => {
+		sipSession.startTime = Date.now();
 		store.dispatch(
 			stateActions.setSessionState({
 				sipSession,
@@ -318,16 +332,168 @@ export default class SipCaller {
 		);
 	};
 
-	holdCall = (sipSession: any) => {
-		sipSession.hold();
+	toggleMyMedia = (sipSession: any) => {
+		let muteAudio = sipSession.localStream.getAudioTracks()[0].enabled;
+		sipSession.localStream.getAudioTracks()[0].enabled = !muteAudio;
+		store.dispatch(
+			stateActions.toggleLocalAudio({
+				sipSession: sipSession?.sipSession,
+			})
+		);
 	};
-	muteCall = (sipSession: any) => {
-		sipSession.mute();
+
+	holdCall = (session: any) => {
+		var sessionDescriptionHandlerOptions =
+			session.sessionDescriptionHandlerOptionsReInvite;
+		sessionDescriptionHandlerOptions.hold = true;
+		session.sessionDescriptionHandlerOptionsReInvite =
+			sessionDescriptionHandlerOptions;
+		session.isOnHold = true;
+
+		var options = {
+			requestDelegate: {
+				onAccept: () => {
+					if (
+						session &&
+						session.sessionDescriptionHandler &&
+						session.sessionDescriptionHandler.peerConnection
+					) {
+						var pc =
+							session.sessionDescriptionHandler.peerConnection;
+
+						pc.getReceivers().forEach(function (
+							RTCRtpReceiver: any
+						) {
+							if (RTCRtpReceiver.track)
+								RTCRtpReceiver.track.enabled = false;
+						});
+						pc.getSenders().forEach(function (RTCRtpSender) {
+							// Mute Audio
+							if (
+								RTCRtpSender.track &&
+								RTCRtpSender.track.kind === "audio"
+							) {
+								if (RTCRtpSender.track.IsMixedTrack === true) {
+									if (
+										session.data.AudioSourceTrack &&
+										session.data.AudioSourceTrack.kind ===
+											"audio"
+									) {
+										console.log(
+											"Muting Mixed Audio Track : " +
+												session.data.AudioSourceTrack
+													.label
+										);
+										session.data.AudioSourceTrack.enabled =
+											false;
+									}
+								}
+								console.log(
+									"Muting Audio Track : " +
+										RTCRtpSender.track.label
+								);
+								RTCRtpSender.track.enabled = false;
+							}
+							// Stop Video
+							else if (
+								RTCRtpSender.track &&
+								RTCRtpSender.track.kind === "video"
+							) {
+								RTCRtpSender.track.enabled = false;
+							}
+						});
+					}
+				},
+			},
+		};
+
+		session.invite(options).catch(function (error) {
+			session.isOnHold = false;
+			console.warn("Error attempting to put the call on hold:", error);
+			store.dispatch(
+				stateActions.setSessionState({
+					sipSession: session,
+					sessionState: HOLD,
+				})
+			);
+		});
+		store.dispatch(
+			stateActions.toggleRemoteAudio({
+				sipSession: session,
+			})
+		);
 	};
-	unmuteCall = (sipSession: any) => {
-		sipSession.unmute();
-	};
-	unholdCall = (sipSession: any) => {
-		sipSession.unhold();
+
+	unholdCall = (session: any) => {
+		var sessionDescriptionHandlerOptions =
+			session.sessionDescriptionHandlerOptionsReInvite;
+		sessionDescriptionHandlerOptions.hold = false;
+		session.sessionDescriptionHandlerOptionsReInvite =
+			sessionDescriptionHandlerOptions;
+		var options = {
+			requestDelegate: {
+				onAccept: function () {
+					if (
+						session &&
+						session.sessionDescriptionHandler &&
+						session.sessionDescriptionHandler.peerConnection
+					) {
+						var pc =
+							session.sessionDescriptionHandler.peerConnection;
+						// Restore all the inbound streams
+						pc.getReceivers().forEach(function (RTCRtpReceiver) {
+							if (RTCRtpReceiver.track)
+								RTCRtpReceiver.track.enabled = true;
+						});
+						// Restore all the outbound streams
+						pc.getSenders().forEach(function (RTCRtpSender) {
+							// Unmute Audio
+							if (
+								RTCRtpSender.track &&
+								RTCRtpSender.track.kind === "audio"
+							) {
+								if (RTCRtpSender.track.IsMixedTrack === true) {
+									if (
+										session.data.AudioSourceTrack &&
+										session.data.AudioSourceTrack.kind ===
+											"audio"
+									) {
+										console.log(
+											"Unmuting Mixed Audio Track : " +
+												session.data.AudioSourceTrack
+													.label
+										);
+										session.data.AudioSourceTrack.enabled =
+											true;
+									}
+								}
+								console.log(
+									"Unmuting Audio Track : " +
+										RTCRtpSender.track.label
+								);
+								RTCRtpSender.track.enabled = true;
+							} else if (
+								RTCRtpSender.track &&
+								RTCRtpSender.track.kind === "video"
+							) {
+								RTCRtpSender.track.enabled = true;
+							}
+						});
+					}
+					session.isOnHold = false;
+				},
+				onReject: function () {
+					session.isOnHold = true;
+				},
+			},
+		};
+		session.invite(options).catch(function (error: any) {
+			session.isOnHold = true;
+		});
+		store.dispatch(
+			stateActions.toggleRemoteAudio({
+				sipSession: session,
+			})
+		);
 	};
 }

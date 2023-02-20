@@ -9,7 +9,6 @@ import { CallEndIcon, CallIcon } from "../icons";
 const SessionNotifications = (props: any) => {
 	const { incomingSessions } = props;
 	const { sipCaller } = useContext<any>(AuthContext);
-	// console.log("incomingSessions", incomingSessions);
 
 	return (
 		<div>
